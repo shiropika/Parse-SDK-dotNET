@@ -58,7 +58,7 @@ namespace Parse
         private readonly int? skip;
         private readonly int? limit;
 
-        internal string ClassName => className;
+        public string ClassName => className;
 
         internal static IParseQueryController QueryController => ParseCorePlugins.Instance.QueryController;
 
