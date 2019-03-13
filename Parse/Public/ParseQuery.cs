@@ -5,12 +5,13 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Net.WebSockets;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Parse.Core.Internal;
+
 using Parse.Common.Internal;
-using System.Net.WebSockets;
+using Parse.Core.Internal;
 
 namespace Parse
 {
@@ -84,12 +85,13 @@ namespace Parse
 
             if (thenBy != null)
             {
-                List<string> newOrderBy = new List<string>(orderBy ?? throw new ArgumentException("You must call OrderBy before calling ThenBy."));
+                List<string> newOrderBy = new List<string>(orderBy ??
+                    throw new ArgumentException("You must call OrderBy before calling ThenBy."));
 
                 newOrderBy.AddRange(thenBy);
                 orderBy = new ReadOnlyCollection<string>(newOrderBy);
             }
-            
+
             // Remove duplicates.
             if (orderBy != null)
                 orderBy = new ReadOnlyCollection<string>(new HashSet<string>(orderBy).ToList());
@@ -162,7 +164,8 @@ namespace Parse
         /// all <see cref="ParseObject"/>s of the provided class.
         /// </summary>
         /// <param name="className">The name of the class to retrieve ParseObjects for.</param>
-        public ParseQuery(string className) => this.className = className ?? throw new ArgumentNullException("className", "Must specify a ParseObject class name when creating a ParseQuery.");
+        public ParseQuery(string className) => this.className = className ??
+            throw new ArgumentNullException("className", "Must specify a ParseObject class name when creating a ParseQuery.");
 
         /// <summary>
         /// Constructs a query that is the or of the given queries.
@@ -184,14 +187,14 @@ namespace Parse
                 var parameters = q.BuildParameters();
                 if (parameters.Count == 0)
                     continue;
-                if (!parameters.TryGetValue("where", out object where) || parameters.Count > 1)
+                if (!parameters.TryGetValue("where", out object where) || parameters.Count < 1)
                     throw new ArgumentException("None of the queries in an or query can have non-filtering clauses");
                 orValue.Add(where as IDictionary<string, object>);
             }
-            return new ParseQuery<T>(new ParseQuery<T>(className), where: new Dictionary<string, object> { { "$or", orValue } });
+            return new ParseQuery<T>(new ParseQuery<T>(className), where : new Dictionary<string, object> { { "$or", orValue } });
         }
 
-        #region Order By
+#region Order By
 
         /// <summary>
         /// Sorts the results in ascending order by the given key.
@@ -199,7 +202,7 @@ namespace Parse
         /// </summary>
         /// <param name="key">The key to order by.</param>
         /// <returns>A new query with the additional constraint.</returns>
-        public ParseQuery<T> OrderBy(string key) => new ParseQuery<T>(this, replacementOrderBy: new List<string> { key });
+        public ParseQuery<T> OrderBy(string key) => new ParseQuery<T>(this, replacementOrderBy : new List<string> { key });
 
         /// <summary>
         /// Sorts the results in descending order by the given key.
@@ -207,7 +210,7 @@ namespace Parse
         /// </summary>
         /// <param name="key">The key to order by.</param>
         /// <returns>A new query with the additional constraint.</returns>
-        public ParseQuery<T> OrderByDescending(string key) => new ParseQuery<T>(this, replacementOrderBy: new List<string> { "-" + key });
+        public ParseQuery<T> OrderByDescending(string key) => new ParseQuery<T>(this, replacementOrderBy : new List<string> { "-" + key });
 
         /// <summary>
         /// Sorts the results in ascending order by the given key, after previous
@@ -219,7 +222,7 @@ namespace Parse
         /// </summary>
         /// <param name="key">The key to order by.</param>
         /// <returns>A new query with the additional constraint.</returns>
-        public ParseQuery<T> ThenBy(string key) => new ParseQuery<T>(this, thenBy: new List<string> { key });
+        public ParseQuery<T> ThenBy(string key) => new ParseQuery<T>(this, thenBy : new List<string> { key });
 
         /// <summary>
         /// Sorts the results in descending order by the given key, after previous
@@ -230,9 +233,9 @@ namespace Parse
         /// </summary>
         /// <param name="key">The key to order by.</param>
         /// <returns>A new query with the additional constraint.</returns>
-        public ParseQuery<T> ThenByDescending(string key) => new ParseQuery<T>(this, thenBy: new List<string> { "-" + key });
+        public ParseQuery<T> ThenByDescending(string key) => new ParseQuery<T>(this, thenBy : new List<string> { "-" + key });
 
-        #endregion
+#endregion
 
         /// <summary>
         /// Include nested ParseObjects for the provided key. You can use dot notation
@@ -240,7 +243,7 @@ namespace Parse
         /// </summary>
         /// <param name="key">The key that should be included.</param>
         /// <returns>A new query with the additional constraint.</returns>
-        public ParseQuery<T> Include(string key) => new ParseQuery<T>(this, includes: new List<string> { key });
+        public ParseQuery<T> Include(string key) => new ParseQuery<T>(this, includes : new List<string> { key });
 
         /// <summary>
         /// Restrict the fields of returned ParseObjects to only include the provided key.
@@ -249,7 +252,7 @@ namespace Parse
         /// </summary>
         /// <param name="key">The key that should be included.</param>
         /// <returns>A new query with the additional constraint.</returns>
-        public ParseQuery<T> Select(string key) => new ParseQuery<T>(this, selectedKeys: new List<string> { key });
+        public ParseQuery<T> Select(string key) => new ParseQuery<T>(this, selectedKeys : new List<string> { key });
 
         /// <summary>
         /// Skips a number of results before returning. This is useful for pagination
@@ -258,7 +261,7 @@ namespace Parse
         /// </summary>
         /// <param name="count">The number of results to skip.</param>
         /// <returns>A new query with the additional constraint.</returns>
-        public ParseQuery<T> Skip(int count) => new ParseQuery<T>(this, skip: count);
+        public ParseQuery<T> Skip(int count) => new ParseQuery<T>(this, skip : count);
 
         /// <summary>
         /// Controls the maximum number of results that are returned. Setting a negative
@@ -268,11 +271,11 @@ namespace Parse
         /// </summary>
         /// <param name="count">The maximum number of results to return.</param>
         /// <returns>A new query with the additional constraint.</returns>
-        public ParseQuery<T> Limit(int count) => new ParseQuery<T>(this, limit: count);
+        public ParseQuery<T> Limit(int count) => new ParseQuery<T>(this, limit : count);
 
-        internal ParseQuery<T> RedirectClassName(String key) => new ParseQuery<T>(this, redirectClassNameForKey: key);
+        internal ParseQuery<T> RedirectClassName(String key) => new ParseQuery<T>(this, redirectClassNameForKey : key);
 
-        #region Where
+#region Where
 
         /// <summary>
         /// Adds a constraint to the query that requires a particular key's value to be
@@ -281,7 +284,7 @@ namespace Parse
         /// <param name="key">The key to check.</param>
         /// <param name="values">The values that will match.</param>
         /// <returns>A new query with the additional constraint.</returns>
-        public ParseQuery<T> WhereContainedIn<TIn>(string key, IEnumerable<TIn> values) => new ParseQuery<T>(this, where: new Dictionary<string, object> { { key, new Dictionary<string, object> { { "$in", values.ToList() } } } });
+        public ParseQuery<T> WhereContainedIn<TIn>(string key, IEnumerable<TIn> values) => new ParseQuery<T>(this, where : new Dictionary<string, object> { { key, new Dictionary<string, object> { { "$in", values.ToList() } } } });
 
         /// <summary>
         /// Add a constraint to the querey that requires a particular key's value to be
@@ -290,7 +293,7 @@ namespace Parse
         /// <param name="key">The key to check.</param>
         /// <param name="values">The values that will match.</param>
         /// <returns>A new query with the additional constraint.</returns>
-        public ParseQuery<T> WhereContainsAll<TIn>(string key, IEnumerable<TIn> values) => new ParseQuery<T>(this, where: new Dictionary<string, object> { { key, new Dictionary<string, object> { { "$all", values.ToList() } } } });
+        public ParseQuery<T> WhereContainsAll<TIn>(string key, IEnumerable<TIn> values) => new ParseQuery<T>(this, where : new Dictionary<string, object> { { key, new Dictionary<string, object> { { "$all", values.ToList() } } } });
 
         /// <summary>
         /// Adds a constraint for finding string values that contain a provided string.
@@ -299,14 +302,14 @@ namespace Parse
         /// <param name="key">The key that the string to match is stored in.</param>
         /// <param name="substring">The substring that the value must contain.</param>
         /// <returns>A new query with the additional constraint.</returns>
-        public ParseQuery<T> WhereContains(string key, string substring) => new ParseQuery<T>(this, where: new Dictionary<string, object> { { key, new Dictionary<string, object> { { "$regex", RegexQuote(substring) } } } });
+        public ParseQuery<T> WhereContains(string key, string substring) => new ParseQuery<T>(this, where : new Dictionary<string, object> { { key, new Dictionary<string, object> { { "$regex", RegexQuote(substring) } } } });
 
         /// <summary>
         /// Adds a constraint for finding objects that do not contain a given key.
         /// </summary>
         /// <param name="key">The key that should not exist.</param>
         /// <returns>A new query with the additional constraint.</returns>
-        public ParseQuery<T> WhereDoesNotExist(string key) => new ParseQuery<T>(this, where: new Dictionary<string, object> { { key, new Dictionary<string, object> { { "$exists", false } } } });
+        public ParseQuery<T> WhereDoesNotExist(string key) => new ParseQuery<T>(this, where : new Dictionary<string, object> { { key, new Dictionary<string, object> { { "$exists", false } } } });
 
         /// <summary>
         /// Adds a constraint to the query that requires that a particular key's value
@@ -316,7 +319,7 @@ namespace Parse
         /// <param name="key">The key to check.</param>
         /// <param name="query">The query that the value should not match.</param>
         /// <returns>A new query with the additional constraint.</returns>
-        public ParseQuery<T> WhereDoesNotMatchQuery<TOther>(string key, ParseQuery<TOther> query) where TOther : ParseObject => new ParseQuery<T>(this, where: new Dictionary<string, object> { { key, new Dictionary<string, object> { { "$notInQuery", query.BuildParameters(true) } } } });
+        public ParseQuery<T> WhereDoesNotMatchQuery<TOther>(string key, ParseQuery<TOther> query) where TOther : ParseObject => new ParseQuery<T>(this, where : new Dictionary<string, object> { { key, new Dictionary<string, object> { { "$notInQuery", query.BuildParameters(true) } } } });
 
         /// <summary>
         /// Adds a constraint for finding string values that end with a provided string.
@@ -325,7 +328,7 @@ namespace Parse
         /// <param name="key">The key that the string to match is stored in.</param>
         /// <param name="suffix">The substring that the value must end with.</param>
         /// <returns>A new query with the additional constraint.</returns>
-        public ParseQuery<T> WhereEndsWith(string key, string suffix) => new ParseQuery<T>(this, where: new Dictionary<string, object> { { key, new Dictionary<string, object> { { "$regex", RegexQuote(suffix) + "$" } } } });
+        public ParseQuery<T> WhereEndsWith(string key, string suffix) => new ParseQuery<T>(this, where : new Dictionary<string, object> { { key, new Dictionary<string, object> { { "$regex", RegexQuote(suffix) + "$" } } } });
 
         /// <summary>
         /// Adds a constraint to the query that requires a particular key's value to be
@@ -334,14 +337,14 @@ namespace Parse
         /// <param name="key">The key to check.</param>
         /// <param name="value">The value that the ParseObject must contain.</param>
         /// <returns>A new query with the additional constraint.</returns>
-        public ParseQuery<T> WhereEqualTo(string key, object value) => new ParseQuery<T>(this, where: new Dictionary<string, object> { { key, value } });
+        public ParseQuery<T> WhereEqualTo(string key, object value) => new ParseQuery<T>(this, where : new Dictionary<string, object> { { key, value } });
 
         /// <summary>
         /// Adds a constraint for finding objects that contain a given key.
         /// </summary>
         /// <param name="key">The key that should exist.</param>
         /// <returns>A new query with the additional constraint.</returns>
-        public ParseQuery<T> WhereExists(string key) => new ParseQuery<T>(this, where: new Dictionary<string, object> { { key, new Dictionary<string, object> { { "$exists", true } } } });
+        public ParseQuery<T> WhereExists(string key) => new ParseQuery<T>(this, where : new Dictionary<string, object> { { key, new Dictionary<string, object> { { "$exists", true } } } });
 
         /// <summary>
         /// Adds a constraint to the query that requires a particular key's value to be
@@ -350,7 +353,7 @@ namespace Parse
         /// <param name="key">The key to check.</param>
         /// <param name="value">The value that provides a lower bound.</param>
         /// <returns>A new query with the additional constraint.</returns>
-        public ParseQuery<T> WhereGreaterThan(string key, object value) => new ParseQuery<T>(this, where: new Dictionary<string, object> { { key, new Dictionary<string, object> { { "$gt", value } } } });
+        public ParseQuery<T> WhereGreaterThan(string key, object value) => new ParseQuery<T>(this, where : new Dictionary<string, object> { { key, new Dictionary<string, object> { { "$gt", value } } } });
 
         /// <summary>
         /// Adds a constraint to the query that requires a particular key's value to be
@@ -359,7 +362,7 @@ namespace Parse
         /// <param name="key">The key to check.</param>
         /// <param name="value">The value that provides a lower bound.</param>
         /// <returns>A new query with the additional constraint.</returns>
-        public ParseQuery<T> WhereGreaterThanOrEqualTo(string key, object value) => new ParseQuery<T>(this, where: new Dictionary<string, object> { { key, new Dictionary<string, object> { { "$gte", value } } } });
+        public ParseQuery<T> WhereGreaterThanOrEqualTo(string key, object value) => new ParseQuery<T>(this, where : new Dictionary<string, object> { { key, new Dictionary<string, object> { { "$gte", value } } } });
 
         /// <summary>
         /// Adds a constraint to the query that requires a particular key's value to be
@@ -368,7 +371,7 @@ namespace Parse
         /// <param name="key">The key to check.</param>
         /// <param name="value">The value that provides an upper bound.</param>
         /// <returns>A new query with the additional constraint.</returns>
-        public ParseQuery<T> WhereLessThan(string key, object value) => new ParseQuery<T>(this, where: new Dictionary<string, object> { { key, new Dictionary<string, object> { { "$lt", value } } } });
+        public ParseQuery<T> WhereLessThan(string key, object value) => new ParseQuery<T>(this, where : new Dictionary<string, object> { { key, new Dictionary<string, object> { { "$lt", value } } } });
 
         /// <summary>
         /// Adds a constraint to the query that requires a particular key's value to be
@@ -377,7 +380,7 @@ namespace Parse
         /// <param name="key">The key to check.</param>
         /// <param name="value">The value that provides a lower bound.</param>
         /// <returns>A new query with the additional constraint.</returns>
-        public ParseQuery<T> WhereLessThanOrEqualTo(string key, object value) => new ParseQuery<T>(this, where: new Dictionary<string, object> { { key, new Dictionary<string, object> { { "$lte", value } } } });
+        public ParseQuery<T> WhereLessThanOrEqualTo(string key, object value) => new ParseQuery<T>(this, where : new Dictionary<string, object> { { key, new Dictionary<string, object> { { "$lte", value } } } });
 
         /// <summary>
         /// Adds a regular expression constraint for finding string values that match the provided
@@ -390,7 +393,8 @@ namespace Parse
         /// <code>i</code> - Case insensitive search
         /// <code>m</code> Search across multiple lines of input</param>
         /// <returns>A new query with the additional constraint.</returns>
-        public ParseQuery<T> WhereMatches(string key, Regex regex, string modifiers) => !regex.Options.HasFlag(RegexOptions.ECMAScript) ? throw new ArgumentException("Only ECMAScript-compatible regexes are supported. Please use the ECMAScript RegexOptions flag when creating your regex.") : new ParseQuery<T>(this, where: new Dictionary<string, object> { { key, EncodeRegex(regex, modifiers) } });
+        public ParseQuery<T> WhereMatches(string key, Regex regex, string modifiers) => !regex.Options.HasFlag(RegexOptions.ECMAScript) ?
+            throw new ArgumentException("Only ECMAScript-compatible regexes are supported. Please use the ECMAScript RegexOptions flag when creating your regex.") : new ParseQuery<T>(this, where : new Dictionary<string, object> { { key, EncodeRegex(regex, modifiers) } });
 
         /// <summary>
         /// Adds a regular expression constraint for finding string values that match the provided
@@ -431,7 +435,7 @@ namespace Parse
         /// <param name="keyInQuery">The key in the objects from the subquery to look in.</param>
         /// <param name="query">The subquery to run</param>
         /// <returns>A new query with the additional constraint.</returns>
-        public ParseQuery<T> WhereMatchesKeyInQuery<TOther>(string key, string keyInQuery, ParseQuery<TOther> query) where TOther : ParseObject => new ParseQuery<T>(this, where: new Dictionary<string, object> { { key, new Dictionary<string, object> { { "$select", new Dictionary<string, object> { { "query", query.BuildParameters(true) }, { "key", keyInQuery } } } } } });
+        public ParseQuery<T> WhereMatchesKeyInQuery<TOther>(string key, string keyInQuery, ParseQuery<TOther> query) where TOther : ParseObject => new ParseQuery<T>(this, where : new Dictionary<string, object> { { key, new Dictionary<string, object> { { "$select", new Dictionary<string, object> { { "query", query.BuildParameters(true) }, { "key", keyInQuery } } } } } });
 
         /// <summary>
         /// Adds a constraint to the query that requires a particular key's value
@@ -441,7 +445,7 @@ namespace Parse
         /// <param name="keyInQuery">The key in the objects from the subquery to look in.</param>
         /// <param name="query">The subquery to run</param>
         /// <returns>A new query with the additional constraint.</returns>
-        public ParseQuery<T> WhereDoesNotMatchesKeyInQuery<TOther>(string key, string keyInQuery, ParseQuery<TOther> query) where TOther : ParseObject => new ParseQuery<T>(this, where: new Dictionary<string, object> { { key, new Dictionary<string, object> { { "$dontSelect", new Dictionary<string, object> { { "query", query.BuildParameters(true) }, { "key", keyInQuery } } } } } });
+        public ParseQuery<T> WhereDoesNotMatchesKeyInQuery<TOther>(string key, string keyInQuery, ParseQuery<TOther> query) where TOther : ParseObject => new ParseQuery<T>(this, where : new Dictionary<string, object> { { key, new Dictionary<string, object> { { "$dontSelect", new Dictionary<string, object> { { "query", query.BuildParameters(true) }, { "key", keyInQuery } } } } } });
 
         /// <summary>
         /// Adds a constraint to the query that requires that a particular key's value
@@ -451,7 +455,7 @@ namespace Parse
         /// <param name="key">The key to check.</param>
         /// <param name="query">The query that the value should match.</param>
         /// <returns>A new query with the additional constraint.</returns>
-        public ParseQuery<T> WhereMatchesQuery<TOther>(string key, ParseQuery<TOther> query) where TOther : ParseObject => new ParseQuery<T>(this, where: new Dictionary<string, object> { { key, new Dictionary<string, object> { { "$inQuery", query.BuildParameters(true) } } } });
+        public ParseQuery<T> WhereMatchesQuery<TOther>(string key, ParseQuery<TOther> query) where TOther : ParseObject => new ParseQuery<T>(this, where : new Dictionary<string, object> { { key, new Dictionary<string, object> { { "$inQuery", query.BuildParameters(true) } } } });
 
         /// <summary>
         /// Adds a proximity-based constraint for finding objects with keys whose GeoPoint
@@ -460,7 +464,7 @@ namespace Parse
         /// <param name="key">The key that the ParseGeoPoint is stored in.</param>
         /// <param name="point">The reference ParseGeoPoint.</param>
         /// <returns>A new query with the additional constraint.</returns>
-        public ParseQuery<T> WhereNear(string key, ParseGeoPoint point) => new ParseQuery<T>(this, where: new Dictionary<string, object> { { key, new Dictionary<string, object> { { "$nearSphere", point } } } });
+        public ParseQuery<T> WhereNear(string key, ParseGeoPoint point) => new ParseQuery<T>(this, where : new Dictionary<string, object> { { key, new Dictionary<string, object> { { "$nearSphere", point } } } });
 
         /// <summary>
         /// Adds a constraint to the query that requires a particular key's value to be
@@ -469,7 +473,7 @@ namespace Parse
         /// <param name="key">The key to check.</param>
         /// <param name="values">The values that will match.</param>
         /// <returns>A new query with the additional constraint.</returns>
-        public ParseQuery<T> WhereNotContainedIn<TIn>(string key, IEnumerable<TIn> values) => new ParseQuery<T>(this, where: new Dictionary<string, object> { { key, new Dictionary<string, object> { { "$nin", values.ToList() } } } });
+        public ParseQuery<T> WhereNotContainedIn<TIn>(string key, IEnumerable<TIn> values) => new ParseQuery<T>(this, where : new Dictionary<string, object> { { key, new Dictionary<string, object> { { "$nin", values.ToList() } } } });
 
         /// <summary>
         /// Adds a constraint to the query that requires a particular key's value not
@@ -478,7 +482,7 @@ namespace Parse
         /// <param name="key">The key to check.</param>
         /// <param name="value">The value that that must not be equalled.</param>
         /// <returns>A new query with the additional constraint.</returns>
-        public ParseQuery<T> WhereNotEqualTo(string key, object value) => new ParseQuery<T>(this, where: new Dictionary<string, object> { { key, new Dictionary<string, object> { { "$ne", value } } } });
+        public ParseQuery<T> WhereNotEqualTo(string key, object value) => new ParseQuery<T>(this, where : new Dictionary<string, object> { { key, new Dictionary<string, object> { { "$ne", value } } } });
 
         /// <summary>
         /// Adds a constraint for finding string values that start with the provided string.
@@ -487,7 +491,7 @@ namespace Parse
         /// <param name="key">The key that the string to match is stored in.</param>
         /// <param name="suffix">The substring that the value must start with.</param>
         /// <returns>A new query with the additional constraint.</returns>
-        public ParseQuery<T> WhereStartsWith(string key, string suffix) => new ParseQuery<T>(this, where: new Dictionary<string, object> { { key, new Dictionary<string, object> { { "$regex", "^" + RegexQuote(suffix) } } } });
+        public ParseQuery<T> WhereStartsWith(string key, string suffix) => new ParseQuery<T>(this, where : new Dictionary<string, object> { { key, new Dictionary<string, object> { { "$regex", "^" + RegexQuote(suffix) } } } });
 
         /// <summary>
         /// Add a constraint to the query that requires a particular key's coordinates to be
@@ -497,7 +501,7 @@ namespace Parse
         /// <param name="southwest">The lower-left inclusive corner of the box.</param>
         /// <param name="northeast">The upper-right inclusive corner of the box.</param>
         /// <returns>A new query with the additional constraint.</returns>
-        public ParseQuery<T> WhereWithinGeoBox(string key, ParseGeoPoint southwest, ParseGeoPoint northeast) => new ParseQuery<T>(this, where: new Dictionary<string, object> { { key, new Dictionary<string, object> { { "$within", new Dictionary<string, object> { { "$box", new[] { southwest, northeast } } } } } } });
+        public ParseQuery<T> WhereWithinGeoBox(string key, ParseGeoPoint southwest, ParseGeoPoint northeast) => new ParseQuery<T>(this, where : new Dictionary<string, object> { { key, new Dictionary<string, object> { { "$within", new Dictionary<string, object> { { "$box", new [] { southwest, northeast } } } } } } });
 
         /// <summary>
         /// Adds a proximity-based constraint for finding objects with keys whose GeoPoint
@@ -507,11 +511,11 @@ namespace Parse
         /// <param name="point">The reference ParseGeoPoint.</param>
         /// <param name="maxDistance">The maximum distance (in radians) of results to return.</param>
         /// <returns>A new query with the additional constraint.</returns>
-        public ParseQuery<T> WhereWithinDistance(string key, ParseGeoPoint point, ParseGeoDistance maxDistance) => new ParseQuery<T>(WhereNear(key, point), where: new Dictionary<string, object> { { key, new Dictionary<string, object> { { "$maxDistance", maxDistance.Radians } } } });
+        public ParseQuery<T> WhereWithinDistance(string key, ParseGeoPoint point, ParseGeoDistance maxDistance) => new ParseQuery<T>(WhereNear(key, point), where : new Dictionary<string, object> { { key, new Dictionary<string, object> { { "$maxDistance", maxDistance.Radians } } } });
 
-        internal ParseQuery<T> WhereRelatedTo(ParseObject parent, string key) => new ParseQuery<T>(this, where: new Dictionary<string, object> { { "$relatedTo", new Dictionary<string, object> { { "object", parent }, { "key", key } } } });
+        internal ParseQuery<T> WhereRelatedTo(ParseObject parent, string key) => new ParseQuery<T>(this, where : new Dictionary<string, object> { { "$relatedTo", new Dictionary<string, object> { { "object", parent }, { "key", key } } } });
 
-        #endregion
+#endregion
 
         /// <summary>
         /// Retrieves a list of ParseObjects that satisfy this query from Parse.
@@ -560,7 +564,8 @@ namespace Parse
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A single ParseObject that satisfies this query.</returns>
         /// <exception cref="ParseException">If no results match the query.</exception>
-        public Task<T> FirstAsync(CancellationToken cancellationToken) => FirstOrDefaultAsync(cancellationToken).OnSuccess(t => t.Result ?? throw new ParseException(ParseException.ErrorCode.ObjectNotFound, "No results matched the query."));
+        public Task<T> FirstAsync(CancellationToken cancellationToken) => FirstOrDefaultAsync(cancellationToken).OnSuccess(t => t.Result ??
+            throw new ParseException(ParseException.ErrorCode.ObjectNotFound, "No results matched the query."));
 
         /// <summary>
         /// Counts the number of objects that match this query.
@@ -597,13 +602,14 @@ namespace Parse
         public Task<T> GetAsync(string objectId, CancellationToken cancellationToken)
         {
             ParseQuery<T> singleItemQuery = new ParseQuery<T>(className).WhereEqualTo("objectId", objectId);
-            singleItemQuery = new ParseQuery<T>(singleItemQuery, includes: includes, selectedKeys: selectedKeys, limit: 1);
-            return singleItemQuery.FindAsync(cancellationToken).OnSuccess(t => t.Result.FirstOrDefault() ?? throw new ParseException(ParseException.ErrorCode.ObjectNotFound, "Object with the given objectId not found."));
+            singleItemQuery = new ParseQuery<T>(singleItemQuery, includes : includes, selectedKeys : selectedKeys, limit : 1);
+            return singleItemQuery.FindAsync(cancellationToken).OnSuccess(t => t.Result.FirstOrDefault() ??
+                throw new ParseException(ParseException.ErrorCode.ObjectNotFound, "Object with the given objectId not found."));
         }
 
         internal object GetConstraint(string key) => where?.GetOrDefault(key, null);
 
-        internal IDictionary<string, object> BuildParameters(bool includeClassName = false)
+        public IDictionary<string, object> BuildParameters(bool includeClassName = false)
         {
             Dictionary<string, object> result = new Dictionary<string, object>();
             if (where != null)
@@ -640,7 +646,10 @@ namespace Parse
         private IDictionary<string, object> EncodeRegex(Regex regex, string modifiers)
         {
             var options = GetRegexOptions(regex, modifiers);
-            var dict = new Dictionary<string, object> { ["$regex"] = regex.ToString() };
+            var dict = new Dictionary<string, object>
+                {
+                    ["$regex"] = regex.ToString()
+                };
             if (!string.IsNullOrEmpty(options))
                 dict["$options"] = options;
             return dict;
@@ -666,7 +675,6 @@ namespace Parse
         /// <returns>A hash code for the current object.</returns>
         public override int GetHashCode()
         {
-            // TODO (richardross): Implement this.
             return 0;
         }
     }
