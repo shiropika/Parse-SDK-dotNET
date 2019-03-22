@@ -3,6 +3,7 @@
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
         <DocumentationFile>bin\Release\netstandard2.0\Parse.xml</DocumentationFile>
+        <noWarn>1591</noWarn>
         <Version>2.0.0-develop</Version>
         <AssemblyVersion>2.0.0</AssemblyVersion>
         <LangVersion>latest</LangVersion>
