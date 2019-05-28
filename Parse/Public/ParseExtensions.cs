@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using Parse.Core.Internal;
 using Parse.Common.Internal;
+using System;
 
 namespace Parse
 {
@@ -108,7 +109,7 @@ namespace Parse
         /// </summary>
         public static Task<T> FetchAsync<T>(this T obj) where T : ParseObject
         {
-            return obj.FetchAsyncInternal(CancellationToken.None).OnSuccess(t => (T) t.Result);
+            return obj.FetchAsyncInternal(CancellationToken.None).OnSuccess(t => (T)t.Result);
         }
 
         /// <summary>
@@ -119,7 +120,7 @@ namespace Parse
         public static Task<T> FetchAsync<T>(this T obj, CancellationToken cancellationToken)
             where T : ParseObject
         {
-            return obj.FetchAsyncInternal(cancellationToken).OnSuccess(t => (T) t.Result);
+            return obj.FetchAsyncInternal(cancellationToken).OnSuccess(t => (T)t.Result);
         }
 
         /// <summary>
@@ -129,7 +130,7 @@ namespace Parse
         /// <param name="obj">The ParseObject to fetch.</param>
         public static Task<T> FetchIfNeededAsync<T>(this T obj) where T : ParseObject
         {
-            return obj.FetchIfNeededAsyncInternal(CancellationToken.None).OnSuccess(t => (T) t.Result);
+            return obj.FetchIfNeededAsyncInternal(CancellationToken.None).OnSuccess(t => (T)t.Result);
         }
 
         /// <summary>
@@ -141,7 +142,43 @@ namespace Parse
         public static Task<T> FetchIfNeededAsync<T>(this T obj, CancellationToken cancellationToken)
             where T : ParseObject
         {
-            return obj.FetchIfNeededAsyncInternal(cancellationToken).OnSuccess(t => (T) t.Result);
+            return obj.FetchIfNeededAsyncInternal(cancellationToken).OnSuccess(t => (T)t.Result);
+        }
+
+        public static IEnumerable<T> ToParseObjects<T>(this string jsonInput, string className)
+            where T : ParseObject
+        {
+            var parseEncodeList = Json.Parse(jsonInput) as IList<object>;
+            var states = parseEncodeList.Select(item =>
+            {
+                try
+                {
+                    return ParseObjectCoder.Instance.Decode(item as IDictionary<string, object>, ParseDecoder.Instance);
+                }
+                catch (Exception decodeException)
+                {
+                    throw decodeException;
+                }
+            });
+
+            var result = states.Select(state =>
+            {
+                try
+                {
+                    return ParseObject.FromState<T>(state, className);
+                }
+                catch (Exception conventionException)
+                {
+                    throw conventionException;
+                }
+            });
+            return result;
+        }
+
+        public static IEnumerable<IDictionary<string, object>> ToJSONObjects<T>(this IEnumerable<T> parseObjects, string className)
+            where T : ParseObject
+        {
+            return parseObjects.Select(item => item.ServerDataToJSONObjectForSerialization()).ToList();
         }
     }
 }
