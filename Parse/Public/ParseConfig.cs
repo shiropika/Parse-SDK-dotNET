@@ -2,12 +2,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Parse.Common.Internal;
 using Parse.Core.Internal;
 using Parse.Utilities;
-using Parse.Common.Internal;
 
 namespace Parse
 {
@@ -15,9 +14,10 @@ namespace Parse
     /// The ParseConfig is a representation of the remote configuration object,
     /// that enables you to add things like feature gating, a/b testing or simple "Message of the day".
     /// </summary>
+    [Serializable]
     public class ParseConfig : IJsonConvertible
     {
-        private IDictionary<string, object> properties = new Dictionary<string, object>();
+        private readonly IDictionary<string, object> properties = new Dictionary<string, object>();
 
         /// <summary>
         /// Gets the latest fetched ParseConfig.
@@ -91,7 +91,7 @@ namespace Parse
         /// key was found, but of a different type.</exception>
         public T Get<T>(string key)
         {
-            return Conversion.To<T>(this.properties[key]);
+            return Conversion.To<T>(properties[key]);
         }
 
         /// <summary>
@@ -104,11 +104,11 @@ namespace Parse
         /// <returns>true if the lookup and conversion succeeded, otherwise false.</returns>
         public bool TryGetValue<T>(string key, out T result)
         {
-            if (this.properties.ContainsKey(key))
+            if (properties.ContainsKey(key))
             {
                 try
                 {
-                    var temp = Conversion.To<T>(this.properties[key]);
+                    var temp = Conversion.To<T>(properties[key]);
                     result = temp;
                     return true;
                 }
@@ -132,15 +132,12 @@ namespace Parse
         {
             get
             {
-                return this.properties[key];
+                return properties[key];
             }
         }
 
-        IDictionary<string, object> IJsonConvertible.ToJSON()
-        {
-            return new Dictionary<string, object> {
-        { "params", NoObjectsEncoder.Instance.Encode(properties) }
-      };
-        }
+        IDictionary<string, object> IJsonConvertible.ToJSON() => new Dictionary<string, object> {
+            { "params", NoObjectsEncoder.Instance.Encode(properties) }
+        };
     }
 }
