@@ -1,6 +1,7 @@
 // Copyright (c) 2015-present, Parse, LLC.  All rights reserved.  This source code is licensed under the BSD-style license found in the LICENSE file in the root directory of this source tree.  An additional grant of patent rights can be found in the PATENTS file in the same directory.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Parse.Common.Internal;
 
@@ -97,8 +98,10 @@ namespace Parse.Utilities
         ///
         /// The map is:
         ///    (object type, generic interface type) => constructed generic type
+        ///
+        /// BFFS-280: https://iherbglobal.atlassian.net/browse/BFFS-280
         /// </summary>
-        private static readonly Dictionary<Tuple<Type, Type>, Type> interfaceLookupCache = new Dictionary<Tuple<Type, Type>, Type>();
+        private static readonly ConcurrentDictionary<Tuple<Type, Type>, Type> interfaceLookupCache = new ConcurrentDictionary<Tuple<Type, Type>, Type>();
 
         private static Type GetInterfaceType(Type objType, Type genericInterfaceType)
         {
