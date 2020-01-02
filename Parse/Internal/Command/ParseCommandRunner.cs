@@ -86,11 +86,12 @@ namespace Parse.Core.Internal
         {
             ParseCommand newCommand = new ParseCommand(command);
 
-            Task<ParseCommand> installationIdTask = installationIdController.GetAsync().ContinueWith(t =>
-            {
-                newCommand.Headers.Add(new KeyValuePair<string, string>("X-Parse-Installation-Id", t.Result.ToString()));
-                return newCommand;
-            });
+            // Disabled
+            //Task<ParseCommand> installationIdTask = installationIdController.GetAsync().ContinueWith(t =>
+            //{
+            //    newCommand.Headers.Add(new KeyValuePair<string, string>("X-Parse-Installation-Id", t.Result.ToString()));
+            //    return newCommand;
+            //});
 
             // TODO (richardross): Inject configuration instead of using shared static here.
             ParseClient.Configuration configuration = ParseClient.CurrentConfiguration;
@@ -135,7 +136,8 @@ namespace Parse.Core.Internal
                 newCommand.Headers.Add(new KeyValuePair<string, string>("X-Parse-Revocable-Session", revocableSessionTokentrueValue));
             }
 
-            return installationIdTask;
+            return Task.FromResult(newCommand);
+            //return new Task<ParseCommand>(() => { return newCommand; });
         }
     }
 }
