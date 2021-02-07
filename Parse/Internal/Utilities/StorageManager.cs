@@ -52,22 +52,35 @@ namespace Parse.Internal.Utilities
         {
             get
             {
-                Console.WriteLine("PersistentStorageFilePath=" + PersistentStorageFilePath);
                 string dir = PersistentStorageFilePath.Substring(0, PersistentStorageFilePath.LastIndexOf(Path.DirectorySeparatorChar) + 1);
 
-                Console.WriteLine("PersistentStorageFilePath dir=" + dir);
-                if (!Directory.Exists(dir))
+                FileInfo file = new FileInfo(PersistentStorageFilePath);
+
+                try
                 {
-                    Console.WriteLine("PersistentStorageFilePath CreateDirectory=" + dir);
-                    Directory.CreateDirectory(dir);
+                    if (!Directory.Exists(dir))
+                    {
+                        Directory.CreateDirectory(dir);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("PersistentStorageFilePath CreateDirectory Exception " + dir + " " + ex.Message);
                 }
 
-                FileInfo file = new FileInfo(PersistentStorageFilePath);
-                if (!file.Exists)
-                    using (file.Create())
+                try
+                {
+                    if (!file.Exists)
+                        using (file.Create())
 #pragma warning disable CS0642 // Possible mistaken empty statement
-                        ; // Hopefully the JIT doesn't no-op this. The behaviour of the "using" clause should dictate how the stream is closed, to make sure it happens properly.
+                            ; // Hopefully the JIT doesn't no-op this. The behaviour of the "using" clause should dictate how the stream is closed, to make sure it happens properly.
 #pragma warning restore CS0642 // Possible mistaken empty statement
+
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("PersistentStorageFilePath file.Create Exception " + PersistentStorageFilePath + " " + ex.Message);
+                }
 
                 return file;
             }
@@ -80,21 +93,14 @@ namespace Parse.Internal.Utilities
         /// <returns>An instance of <see cref="FileInfo"/> wrapping the the <paramref name="path"/> value</returns>
         public static FileInfo GetWrapperForRelativePersistentStorageFilePath(string path)
         {
-            Console.WriteLine("GetWrapperForRelativePersistentStorageFilePath path=" + path);
-
             path = Path.GetFullPath(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), path));
 
-            Console.WriteLine("GetWrapperForRelativePersistentStorageFilePath path2=" + path);
-
             //Directory.CreateDirectory(path.Substring(0, path.LastIndexOf(Path.VolumeSeparatorChar)));
-            path = path.Substring(0, path.LastIndexOf(Path.DirectorySeparatorChar) + 1);
+            string dir = path.Substring(0, path.LastIndexOf(Path.DirectorySeparatorChar) + 1);
 
-            Console.WriteLine("GetWrapperForRelativePersistentStorageFilePath path3=" + path);
-
-            if (!Directory.Exists(path))
+            if (!Directory.Exists(dir))
             {
-                Console.WriteLine("GetWrapperForRelativePersistentStorageFilePath CreateDirectory=" + path);
-                Directory.CreateDirectory(path);
+                Directory.CreateDirectory(dir);
             }
 
             return new FileInfo(path);
