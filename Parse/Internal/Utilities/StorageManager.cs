@@ -52,27 +52,32 @@ namespace Parse.Internal.Utilities
         {
             get
             {
+                bool isInContainer = Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true";
+
                 string dir = PersistentStorageFilePath.Substring(0, PersistentStorageFilePath.LastIndexOf(Path.DirectorySeparatorChar) + 1);
 
                 FileInfo file = new FileInfo(PersistentStorageFilePath);
 
-                try
+                if (!isInContainer)
                 {
-                    if (!Directory.Exists(dir))
+                    try
                     {
-                        Directory.CreateDirectory(dir);
+                        if (!Directory.Exists(dir))
+                        {
+                            Directory.CreateDirectory(dir);
+                        }
                     }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("PersistentStorageFilePath CreateDirectory Exception " + dir + " " + ex.Message);
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("PersistentStorageFilePath CreateDirectory Exception " + dir + " " + ex.Message);
+                    }
                 }
 
                 try
                 {
                     if (!file.Exists)
                         using (file.Create())
-                            Console.WriteLine("PersistentStorageFilePath CreateFile Success"+ PersistentStorageFilePath);
+                            Console.WriteLine("PersistentStorageFilePath CreateFile Success" + PersistentStorageFilePath);
                 }
                 catch (Exception ex)
                 {
