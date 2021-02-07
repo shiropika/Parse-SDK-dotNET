@@ -53,11 +53,14 @@ namespace Parse.Internal.Utilities
             get
             {
                 Console.WriteLine("PersistentStorageFilePath=" + PersistentStorageFilePath);
-                string dir = PersistentStorageFilePath.Substring(0, PersistentStorageFilePath.LastIndexOf(Path.DirectorySeparatorChar));
+                string dir = PersistentStorageFilePath.Substring(0, PersistentStorageFilePath.LastIndexOf(Path.DirectorySeparatorChar) + 1);
 
                 Console.WriteLine("PersistentStorageFilePath dir=" + dir);
                 if (!Directory.Exists(dir))
+                {
+                    Console.WriteLine("PersistentStorageFilePath CreateDirectory=" + dir);
                     Directory.CreateDirectory(dir);
+                }
 
                 FileInfo file = new FileInfo(PersistentStorageFilePath);
                 if (!file.Exists)
@@ -81,16 +84,18 @@ namespace Parse.Internal.Utilities
 
             path = Path.GetFullPath(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), path));
 
-
             Console.WriteLine("GetWrapperForRelativePersistentStorageFilePath path2=" + path);
 
             //Directory.CreateDirectory(path.Substring(0, path.LastIndexOf(Path.VolumeSeparatorChar)));
-            path = path.Substring(0, path.LastIndexOf(Path.DirectorySeparatorChar));
+            path = path.Substring(0, path.LastIndexOf(Path.DirectorySeparatorChar) + 1);
 
             Console.WriteLine("GetWrapperForRelativePersistentStorageFilePath path3=" + path);
 
             if (!Directory.Exists(path))
+            {
+                Console.WriteLine("GetWrapperForRelativePersistentStorageFilePath CreateDirectory=" + path);
                 Directory.CreateDirectory(path);
+            }
 
             return new FileInfo(path);
         }
