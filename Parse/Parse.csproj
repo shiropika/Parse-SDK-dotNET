@@ -11,7 +11,6 @@
         <Authors>Parse</Authors>
         <PackageProjectUrl>https://parseplatform.org/</PackageProjectUrl>
         <RepositoryUrl>https://github.com/parse-community/Parse-SDK-dotNET/</RepositoryUrl>
-        <PackageIconUrl>https://raw.githubusercontent.com/parse-community/parse-community.github.io/master/img/favicon/favicon-194x194.png</PackageIconUrl>
         <RepositoryType>GitHub</RepositoryType>
         <Description>This is the official package for the Parse .NET Standard SDK. Add a cloud backend to any platform supporting .NET Standard 2.0 with this simple-to-use SDK.</Description>
         <Copyright>Copyright © Parse 2018. All rights reserved.</Copyright>

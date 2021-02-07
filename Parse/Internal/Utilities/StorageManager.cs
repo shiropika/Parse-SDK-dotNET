@@ -52,14 +52,16 @@ namespace Parse.Internal.Utilities
         {
             get
             {
-                var dir = PersistentStorageFilePath.Substring(0, PersistentStorageFilePath.LastIndexOf(Path.DirectorySeparatorChar));
+                string dir = PersistentStorageFilePath.Substring(0, PersistentStorageFilePath.LastIndexOf(Path.DirectorySeparatorChar));
                 if (!Directory.Exists(dir))
                     Directory.CreateDirectory(dir);
 
                 FileInfo file = new FileInfo(PersistentStorageFilePath);
                 if (!file.Exists)
                     using (file.Create())
+#pragma warning disable CS0642 // Possible mistaken empty statement
                         ; // Hopefully the JIT doesn't no-op this. The behaviour of the "using" clause should dictate how the stream is closed, to make sure it happens properly.
+#pragma warning restore CS0642 // Possible mistaken empty statement
 
                 return file;
             }
