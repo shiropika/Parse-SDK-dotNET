@@ -72,10 +72,7 @@ namespace Parse.Internal.Utilities
                 {
                     if (!file.Exists)
                         using (file.Create())
-#pragma warning disable CS0642 // Possible mistaken empty statement
-                            ; // Hopefully the JIT doesn't no-op this. The behaviour of the "using" clause should dictate how the stream is closed, to make sure it happens properly.
-#pragma warning restore CS0642 // Possible mistaken empty statement
-
+                            Console.WriteLine("PersistentStorageFilePath CreateFile Success"+ PersistentStorageFilePath);
                 }
                 catch (Exception ex)
                 {
