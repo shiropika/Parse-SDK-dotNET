@@ -59,7 +59,6 @@ namespace Parse.Internal.Utilities
                 FileInfo file = new FileInfo(PersistentStorageFilePath);
 
                 if (!isInContainer)
-                {
                     try
                     {
                         if (!Directory.Exists(dir))
@@ -71,7 +70,6 @@ namespace Parse.Internal.Utilities
                     {
                         Console.WriteLine("PersistentStorageFilePath CreateDirectory Exception " + dir + " " + ex.Message);
                     }
-                }
 
                 try
                 {
