@@ -52,7 +52,10 @@ namespace Parse.Internal.Utilities
         {
             get
             {
+                Console.WriteLine("PersistentStorageFilePath=" + PersistentStorageFilePath);
                 string dir = PersistentStorageFilePath.Substring(0, PersistentStorageFilePath.LastIndexOf(Path.DirectorySeparatorChar));
+
+                Console.WriteLine("PersistentStorageFilePath dir=" + dir);
                 if (!Directory.Exists(dir))
                     Directory.CreateDirectory(dir);
 
@@ -74,10 +77,18 @@ namespace Parse.Internal.Utilities
         /// <returns>An instance of <see cref="FileInfo"/> wrapping the the <paramref name="path"/> value</returns>
         public static FileInfo GetWrapperForRelativePersistentStorageFilePath(string path)
         {
+            Console.WriteLine("GetWrapperForRelativePersistentStorageFilePath path=" + path);
+
             path = Path.GetFullPath(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), path));
+
+
+            Console.WriteLine("GetWrapperForRelativePersistentStorageFilePath path2=" + path);
 
             //Directory.CreateDirectory(path.Substring(0, path.LastIndexOf(Path.VolumeSeparatorChar)));
             path = path.Substring(0, path.LastIndexOf(Path.DirectorySeparatorChar));
+
+            Console.WriteLine("GetWrapperForRelativePersistentStorageFilePath path3=" + path);
+
             if (!Directory.Exists(path))
                 Directory.CreateDirectory(path);
 
